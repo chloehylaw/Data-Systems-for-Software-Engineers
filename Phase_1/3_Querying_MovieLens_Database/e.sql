@@ -1,10 +1,12 @@
-/* Critiques say that some words used in tags to convey emotions are very recurrent. To
+/* 
+Critiques say that some words used in tags to convey emotions are very recurrent. To
 convey positive and negative emotions, the words 'good' and 'bad', respectively, are used
 predominantly in tags. 
 
 Print all movie titles whose audience opinion is split (i.e., has at
 least one audience who expresses positive emotion and at least one who expresses negative
-emotion).*/
+emotion).
+*/
 
 SELECT DISTINCT g.title
 FROM
