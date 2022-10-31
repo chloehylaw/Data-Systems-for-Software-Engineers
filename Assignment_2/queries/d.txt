@@ -1,0 +1,10 @@
+SELECT DISTINCT x.username, x.city
+FROM (
+    SELECT x.username as x, y.username as y
+    FROM users as y, users as x, follows
+    WHERE x.userid = follows.followerid
+        AND y.userid = follows.followeeid
+        AND y.username = 'Yoshua Bengio') AS temp, users as x, users as y, follows
+WHERE x.userid = follows.followerid
+    AND y.userid = follows.followeeid
+    AND y.username = temp.x;

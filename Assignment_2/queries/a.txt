@@ -1,0 +1,8 @@
+SELECT u1.username, u2.username, tw.tweettext, rt.retweettimestamp
+FROM retweets rt, tweettags tag, tweets tw, users u1, users u2
+WHERE rt.retweettimestamp > '2015-01-01'  
+AND tag.hashtag LIKE '#iPhone%'
+AND tw.tweetid = tag.tweetid
+AND rt.tweetid = tw.tweetid
+AND u1.userid = tw.userid
+AND rt.userid = u2.userid;

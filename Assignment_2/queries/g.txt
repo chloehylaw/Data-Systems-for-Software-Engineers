@@ -1,0 +1,9 @@
+SELECT x.username, COUNT(t.tweettext)as tweets
+FROM follows
+INNER JOIN users as x ON follows.followerid=x.userid
+INNER JOIN users as y ON follows.followeeid=y.userid
+LEFT OUTER JOIN tweets t on y.userid = t.userid AND x.lastlogin < t.tweettimestamp
+WHERE t.tweetid IS NOT NULL
+GROUP BY x.username
+ORDER BY tweets DESC
+LIMIT 5;

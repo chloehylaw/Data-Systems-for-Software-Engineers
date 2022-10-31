@@ -1,0 +1,10 @@
+SELECT DISTINCT x.username, x.city
+FROM users x, users  y, follows f
+WHERE f.followerId = x.userId 
+AND f.followeeId = y.userId 
+AND y.userId in 
+	(SELECT u.userId
+	 FROM users u, users v, follows f
+	 WHERE v.username = 'Ian Goodfellow' 
+	 AND f.followerId = v.userId 
+	 AND f.followeeId = u.userId)

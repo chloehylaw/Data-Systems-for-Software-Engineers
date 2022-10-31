@@ -1,0 +1,9 @@
+SELECT DISTINCT x.username, x.city
+FROM (SELECT x.userid as follower
+    FROM follows
+    INNER JOIN users as x ON follows.followerid=x.userid
+    INNER JOIN users as y ON follows.followeeid=y.userid
+    WHERE y.username = 'Yoshua Bengio') as temp, follows
+INNER JOIN users as x ON follows.followerid=x.userid
+INNER JOIN users as y ON follows.followeeid=y.userid
+WHERE y.userid = temp.follower;

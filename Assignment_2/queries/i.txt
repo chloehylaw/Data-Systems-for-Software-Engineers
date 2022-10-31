@@ -1,0 +1,9 @@
+SELECT u.username, COUNT(u.userId)
+FROM users u, users v, tweets tw, retweets rt
+WHERE v.username = 'Andrew Ng' 
+AND tw.userId = v.userId 
+AND rt.tweetId = tw.tweetId 
+AND rt.userId = u.userId
+GROUP BY u.username
+ORDER BY COUNT(u.userId) DESC
+LIMIT 10

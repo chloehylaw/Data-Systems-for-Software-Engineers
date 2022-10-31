@@ -1,0 +1,7 @@
+SELECT hashtag, COUNT(hashtag) as count
+FROM retweets, tweettags
+WHERE retweets.tweetid = tweettags.tweetid
+AND EXTRACT(year FROM retweettimestamp) >= 2021
+GROUP BY hashtag
+ORDER BY count DESC
+LIMIT 1

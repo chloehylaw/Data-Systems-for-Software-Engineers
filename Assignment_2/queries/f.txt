@@ -1,0 +1,8 @@
+SELECT concat(t.tweettext, t2.tweettext) as tweets
+FROM follows
+INNER JOIN users as x ON follows.followerid=x.userid
+INNER JOIN users as y ON follows.followeeid=y.userid
+LEFT OUTER JOIN tweets t on y.userid = t.userid AND x.lastlogin < t.tweettimestamp
+LEFT OUTER JOIN retweets r on y.userid = r.userid AND x.lastlogin < r.retweettimestamp
+LEFT OUTER JOIN tweets t2 on r.tweetid = t2.tweetid
+WHERE x.username = 'Geoffrey Hinton' AND ((t.tweetid IS NOT NULL) OR (t2.tweetid IS NOT NULL) );

@@ -1,0 +1,8 @@
+SELECT username, COUNT(hashtag) as count FROM
+    (SELECT DISTINCT username, hashtag
+	 FROM  users U, tweettags, tweets
+	 WHERE U.userid = tweets.userid
+	 AND tweettags.tweetid = tweets.tweetid
+	 ORDER BY username) as temp
+GROUP BY username
+ORDER BY count DESC;
