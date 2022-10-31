@@ -1,0 +1,29 @@
+/*
+h. Let us find out who are the ’no flop’ actors. A ’no flop’ actor can be defined as one who has
+played only in movies which have a rating greater than or equal to 4. We split this problem
+into the following steps.
+
+i. Create a view called high ratings which contains the distinct names of all actors who
+have played in movies with a rating greater than or equal to 4. Similarly, create a view
+called low ratings which contains the distinct names of all actors who have played in
+movies with a rating less than 4. Print the number of rows in each view.
+*/
+
+CREATE VIEW high_ratings AS
+SELECT DISTINCT actors.name, movies.rating
+FROM actors, movies
+WHERE movies.rating >= 4
+AND movies.mid = actors.mid;
+
+CREATE VIEW low_ratings AS
+SELECT DISTINCT actors.name, movies.rating
+FROM actors, movies
+WHERE movies.rating < 4
+AND movies.mid = actors.mid;
+
+SELECT(
+	SELECT COUNT(high_ratings.name) 
+	FROM high_ratings) AS high_ratings_num_rows,
+	(
+		SELECT COUNT(low_ratings.name) 
+		FROM low_ratings) AS low_ratings_num_rows;

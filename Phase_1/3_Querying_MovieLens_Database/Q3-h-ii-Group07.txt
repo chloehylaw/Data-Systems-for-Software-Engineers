@@ -1,0 +1,10 @@
+/*
+h. Let us find out who are the ’no flop’ actors. A ’no flop’ actor can be defined as one who has
+played only in movies which have a rating greater than or equal to 4. We split this problem
+into the following steps.
+
+ii. Use the above views to print the number of ’no flop’ actors in the database
+*/
+
+SELECT COUNT(high_ratings.name) AS num_no_flop
+FROM high_ratings;

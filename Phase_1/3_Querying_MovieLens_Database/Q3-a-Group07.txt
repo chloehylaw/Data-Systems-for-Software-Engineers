@@ -1,0 +1,4 @@
+SELECT M.title
+FROM actors A, movies M
+WHERE A.name = 'Daniel Craig' and M.mid = A.mid
+ORDER by M.title asc

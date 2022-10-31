@@ -1,0 +1,5 @@
+SELECT G.genre, COUNT(*) as N
+FROM genres G, movies M
+WHERE M.mid = G.mid
+GROUP BY G.genre
+HAVING COUNT(*)>1000

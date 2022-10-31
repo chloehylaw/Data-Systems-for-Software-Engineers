@@ -1,0 +1,7 @@
+
+(SELECT *
+FROM movies AS m
+WHERE m.rating = (SELECT  max(m.rating)
+	FROM movies AS m)
+ORDER BY m.mid ASC)
+

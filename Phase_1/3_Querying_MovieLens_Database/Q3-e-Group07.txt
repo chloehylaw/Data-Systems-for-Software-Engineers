@@ -1,0 +1,8 @@
+(SELECT m.title 
+FROM tags AS tg, tag_names AS tgNm, movies AS m
+WHERE tg.mid=M.mid and tg.tid=tgNm.tid and tgNm.tag like '%good%')
+INTERSECT
+(SELECT m.title  
+FROM tags AS tg, tag_names AS tgNm, movies AS m
+WHERE tg.mid=M.mid and tg.tid=tgNm.tid and tgNm.tag like '%bad%') 
+

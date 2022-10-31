@@ -1,0 +1,16 @@
+/*
+(b) Profile the query execution time with and without the indexes.
+
+ After creating the indexes we notice an improvement in the query execution time for example:
+
+ - question 3-k-1 takes around 200ms before indexes and that improves to around 100ms after creating the indexes.
+ - question 3-k-2 takes around 30 SECONDS to query all fields on the created view. After indexes the average is around 13 SECONDS.
+ - question 3-i takes around 500ms to execute before indexes. After indexes that is reduced to around 300ms.
+ - question 3-g takes around 160ms before indexing, after it improves to around 80ms.
+ - other improvements can be seen on other queries as well with varying degrees.
+
+
+
+
+
+

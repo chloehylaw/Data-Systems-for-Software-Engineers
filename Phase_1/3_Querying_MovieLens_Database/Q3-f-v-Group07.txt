@@ -1,0 +1,11 @@
+(SELECT *
+FROM movies AS m
+WHERE m.num_ratings = (SELECT  max(m.num_ratings) 
+	FROM movies AS m))
+INTERSECT
+(SELECT *
+FROM movies AS m
+WHERE m.rating = (SELECT  min(m.rating)
+	FROM movies AS m
+	WHERE m.num_ratings!=0))
+

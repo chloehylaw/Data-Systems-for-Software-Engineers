@@ -1,0 +1,143 @@
+/*
+Q4-b-b) Re-implement your answer for questions 3-l using materialized views.
+
+Find the implementation below. We notice that querying materialized views is a lot
+faster than normal view. This is consistant with what we learned because normal views
+are always computed on the spot when they are queried and the data is not stored explicitly
+in contrast, materialized views actually compute and store the data in the database so they are
+a lot faster to query. Keep in mind that materialized views must be updated (refreshed) 
+either manually or by setting a periodic job to update or some other setting (such as update 
+the materialized view on insertions ...etc)
+
+in this question querying materilaized views took around 70ms while querying normal views took about 10 SECONDS
+*/
+
+--Actors
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_total_actors AS
+    SELECT DISTINCT COUNT( DISTINCT actors_in_movie.name)*1.0 as total
+        FROM actors actors_in_movie, movies
+        WHERE movies.title = 'Mr. & Mrs. Smith'
+        AND actors_in_movie.mid = movies.mid;
+
+--actors, this view will give movies mids of other films
+--that have one or more actors that are also in Mr and Mrs Smith, ordered decsending
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_other_films_with_same_actors AS
+    SELECT actors.mid, COUNT( actors.mid)/materialized_total_actors.total AS score
+    FROM actors, movies, materialized_total_actors
+    WHERE actors.name IN (SELECT DISTINCT actors_in_movie.name
+        FROM actors actors_in_movie, movies
+        WHERE movies.title = 'Mr. & Mrs. Smith'
+        AND actors_in_movie.mid = movies.mid)
+    AND movies.mid = actors.mid
+    and movies.title <> 'Mr. & Mrs. Smith'
+    GROUP BY actors.mid, materialized_total_actors.total
+     ORDER BY COUNT(actors.mid) DESC;
+
+
+
+
+--Tags
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_total_tags AS
+SELECT COUNT(tags.tid)*1.0 as total
+    FROM tags
+    WHERE tags.mid IN (SELECT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith');
+
+--tags, this view will give movies mids for films with at least
+--one of tags as mr and mrs smith, ordered descending
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_other_films_with_same_tags AS
+SELECT COUNT (other_films.mid)/materialized_total_tags.total AS score, other_films.mid
+FROM tags other_films, movies m, materialized_total_tags
+WHERE other_films.tid IN (SELECT tags.tid
+    FROM tags
+    WHERE tags.mid IN (SELECT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith')
+    )
+AND m.mid = other_films.mid
+AND m.title <> 'Mr. & Mrs. Smith'
+GROUP BY other_films.mid, materialized_total_tags.total
+ORDER BY COUNT (other_films.mid) DESC;
+
+
+
+
+--Genres
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_total_genres AS
+SELECT COUNT( DISTINCT genres.genre)*1.0 as total
+    FROM genres
+    WHERE genres.mid IN (SELECT DISTINCT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith');
+
+--genres, finds movies mid for films with at least one of the same tags as
+--mr and mrs smith, films ordered from highest number of same tags to lowest
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_other_films_with_same_genres AS
+SELECT COUNT (other_films.mid)/materialized_total_genres.total AS score, other_films.mid
+FROM genres other_films, movies m, materialized_total_genres
+WHERE other_films.genre IN (SELECT DISTINCT genres.genre
+    FROM genres
+    WHERE genres.mid IN (SELECT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith')
+    )
+AND m.mid = other_films.mid
+AND m.title <> 'Mr. & Mrs. Smith'
+GROUP BY other_films.mid, materialized_total_genres.total
+ORDER BY COUNT (other_films.mid) DESC;
+
+
+
+
+--Rating Gap
+--normalized differemce of ratings of other films
+-- compared to Mr and Mrs Smith (1 means they have
+-- exact same rating, closer to 0 means larger difference in rating
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_other_films_norm_ratings AS
+SELECT DISTINCT (1 - (ABS(other_film.rating - MMS2.rating)/5)) AS score, other_film.mid
+FROM movies other_film, movies MMS2
+WHERE MMS2.rating = (SELECT MMS.rating
+    FROM movies MMS WHERE MMS.title =  'Mr. & Mrs. Smith'
+    LIMIT 1
+)
+AND other_film.title <> 'Mr. & Mrs. Smith'
+AND other_film.rating IS NOT NULL
+ORDER BY  (1 - (ABS(other_film.rating - MMS2.rating)/5)) DESC;
+
+
+
+--Age Gap
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_largest_age_gap AS
+    SELECT  (MAX(movies.year) -MIN(movies.year))*1.0 as difference
+FROM movies;
+
+
+--normalized age gap between films
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_other_films_normage AS
+SELECT DISTINCT (1-(ABS(other_film.year - MMS2.year)/materialized_largest_age_gap.difference)) AS score, other_film.mid
+FROM movies MMS2, movies other_film, materialized_largest_age_gap
+WHERE MMS2.year =(SELECT MMS.year
+    FROM movies MMS WHERE MMS.title =  'Mr. & Mrs. Smith'
+    LIMIT 1)
+AND other_film.title <> 'Mr. & Mrs. Smith'
+ORDER BY (1-(ABS(other_film.year - MMS2.year)/materialized_largest_age_gap.difference)) DESC;
+
+
+
+
+--Top ten similar films to Mr and Mrs Smith
+CREATE MATERIALIZED VIEW IF NOT EXISTS materialized_top_ten_match AS
+SELECT movies.title, movies.rating, 100*(f1.score + f2.score + f3.score + g1.score + g2.score)/5 AS similarity_perc
+FROM materialized_other_films_with_same_actors f1, materialized_other_films_with_same_tags f2, materialized_other_films_with_same_genres f3,
+     materialized_other_films_normage g1, materialized_other_films_norm_ratings g2, movies
+WHERE f1.mid= movies.mid
+AND f2.mid= movies.mid
+AND f3.mid= movies.mid
+AND g1.mid= movies.mid
+AND g2.mid= movies.mid
+ORDER BY similarity_perc DESC
+LIMIT 10;
+
+SELECT *
+FROM materialized_top_ten_match;

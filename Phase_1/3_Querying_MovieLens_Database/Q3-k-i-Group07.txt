@@ -1,0 +1,17 @@
+Select a2.name, count(Distinct a1.name) -1
+from actors a1,
+actors a2
+where 
+a2.name = 'Tom Cruise'
+and
+a1.mid in (
+select Distinct movies.mid 
+from movies
+join actors on
+actors.mid = movies.mid
+where actors.name = 'Tom Cruise'
+)
+group by a2.name
+
+
+

@@ -1,0 +1,13 @@
+
+SELECT m2.year, m2.title, m2.rating, m2.mid
+FROM(
+	SELECT m.year AS yr, min(m.rating) AS minR, max(m.rating) AS maxR
+	FROM movies AS m
+	WHERE m.num_ratings >0 AND (m.year BETWEEN 2005 AND 2011)
+	GROUP BY m.year) AS ratings_per_year, movies AS m2
+WHERE m2.year = ratings_per_year.yr and (m2.rating = ratings_per_year.minR OR m2.rating = ratings_per_year.maxR)
+ORDER BY 
+	year ASC,
+	rating ASC,
+	title ASC;
+

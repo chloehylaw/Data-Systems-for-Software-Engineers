@@ -1,0 +1,18 @@
+/*
+j. Let us find the close friends of Annette Nicole. Print the names of all actors who have starred
+in (at least) all movies in which Annette Nicole has starred in. Note that it is OK if these
+actors have starred in more movies than Annette Nicole has played in. Since PostgreSQL
+does not provide a relational division operator, we will guide you through the following steps
+(you might find it useful to consult the slides or the textbook for the alternative "double
+negation" method of performing relational division).
+
+iv. Finally, from the view co_actors, eliminate the distinct actors that appear in the view
+non_extistent. Print the names of all co_actors except Annette Nicole.
+
+*/
+
+SELECT ca.name
+FROM co_actors ca
+WHERE ca.name not in (SELECT DISTINCT ne.name
+        FROM non_existent ne)
+    AND ca.name <> 'Annette Nicole'

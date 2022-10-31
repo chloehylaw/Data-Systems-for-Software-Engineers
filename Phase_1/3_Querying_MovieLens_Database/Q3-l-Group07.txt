@@ -1,0 +1,132 @@
+--l
+
+--Actors
+CREATE OR REPLACE VIEW total_actors AS
+    SELECT DISTINCT COUNT( DISTINCT actors_in_movie.name)*1.0 as total
+        FROM actors actors_in_movie, movies
+        WHERE movies.title = 'Mr. & Mrs. Smith'
+        AND actors_in_movie.mid = movies.mid;
+
+--actors, this view will give movies mids of other films
+--that have one or more actors that are also in Mr and Mrs Smith, ordered decsending
+CREATE OR REPLACE VIEW other_films_with_same_actors AS
+    SELECT actors.mid, COUNT( actors.mid)/total_actors.total AS score
+    FROM actors, movies, total_actors
+    WHERE actors.name IN (SELECT DISTINCT actors_in_movie.name
+        FROM actors actors_in_movie, movies
+        WHERE movies.title = 'Mr. & Mrs. Smith'
+        AND actors_in_movie.mid = movies.mid)
+    AND movies.mid = actors.mid
+    and movies.title <> 'Mr. & Mrs. Smith'
+    GROUP BY actors.mid, total_actors.total
+     ORDER BY COUNT(actors.mid) DESC;
+
+
+
+
+--Tags
+CREATE OR REPLACE VIEW total_tags AS
+SELECT COUNT(tags.tid)*1.0 as total
+    FROM tags
+    WHERE tags.mid IN (SELECT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith');
+
+--tags, this view will give movies mids for films with at least
+--one of tags as mr and mrs smith, ordered descending
+CREATE OR REPLACE VIEW other_films_with_same_tags AS
+SELECT COUNT (other_films.mid)/total_tags.total AS score, other_films.mid
+FROM tags other_films, movies m, total_tags
+WHERE other_films.tid IN (SELECT tags.tid
+    FROM tags
+    WHERE tags.mid IN (SELECT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith')
+    )
+AND m.mid = other_films.mid
+AND m.title <> 'Mr. & Mrs. Smith'
+GROUP BY other_films.mid, total_tags.total
+ORDER BY COUNT (other_films.mid) DESC;
+
+
+
+
+--Genres
+CREATE OR REPLACE VIEW total_genres AS
+SELECT COUNT( DISTINCT genres.genre)*1.0 as total
+    FROM genres
+    WHERE genres.mid IN (SELECT DISTINCT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith');
+
+--genres, finds movies mid for films with at least one of the same tags as
+--mr and mrs smith, films ordered from highest number of same tags to lowest
+CREATE OR REPLACE VIEW other_films_with_same_genres AS
+SELECT COUNT (other_films.mid)/total_genres.total AS score, other_films.mid
+FROM genres other_films, movies m, total_genres
+WHERE other_films.genre IN (SELECT DISTINCT genres.genre
+    FROM genres
+    WHERE genres.mid IN (SELECT movies.mid
+        FROM movies
+        WHERE movies.title = 'Mr. & Mrs. Smith')
+    )
+AND m.mid = other_films.mid
+AND m.title <> 'Mr. & Mrs. Smith'
+GROUP BY other_films.mid, total_genres.total
+ORDER BY COUNT (other_films.mid) DESC;
+
+
+
+
+--Rating Gap
+--normalized differemce of ratings of other films
+-- compared to Mr and Mrs Smith (1 means they have
+-- exact same rating, closer to 0 means larger difference in rating
+CREATE OR REPLACE VIEW other_films_norm_ratings AS
+SELECT DISTINCT (1 - (ABS(other_film.rating - MMS2.rating)/5)) AS score, other_film.mid
+FROM movies other_film, movies MMS2
+WHERE MMS2.rating = (SELECT MMS.rating
+    FROM movies MMS WHERE MMS.title =  'Mr. & Mrs. Smith'
+    LIMIT 1
+)
+AND other_film.title <> 'Mr. & Mrs. Smith'
+AND other_film.rating IS NOT NULL
+ORDER BY  (1 - (ABS(other_film.rating - MMS2.rating)/5)) DESC;
+
+
+
+--Age Gap
+CREATE OR REPLACE VIEW largest_age_gap AS
+    SELECT  (MAX(movies.year) -MIN(movies.year))*1.0 as difference
+FROM movies;
+
+
+--normalized age gap between films
+CREATE OR REPLACE VIEW other_films_normage AS
+SELECT DISTINCT (1-(ABS(other_film.year - MMS2.year)/largest_age_gap.difference)) AS score, other_film.mid
+FROM movies MMS2, movies other_film, largest_age_gap
+WHERE MMS2.year =(SELECT MMS.year
+    FROM movies MMS WHERE MMS.title =  'Mr. & Mrs. Smith'
+    LIMIT 1)
+AND other_film.title <> 'Mr. & Mrs. Smith'
+ORDER BY (1-(ABS(other_film.year - MMS2.year)/largest_age_gap.difference)) DESC;
+
+
+
+
+--Top ten similar films to Mr and Mrs Smith
+CREATE OR REPLACE VIEW top_ten_match AS
+SELECT movies.title, movies.rating, 100*(f1.score + f2.score + f3.score + g1.score + g2.score)/5 AS similarity_perc
+FROM other_films_with_same_actors f1, other_films_with_same_tags f2, other_films_with_same_genres f3,
+     other_films_normage g1, other_films_norm_ratings g2, movies
+WHERE f1.mid= movies.mid
+AND f2.mid= movies.mid
+AND f3.mid= movies.mid
+AND g1.mid= movies.mid
+AND g2.mid= movies.mid
+ORDER BY similarity_perc DESC
+LIMIT 10;
+
+SELECT *
+FROM top_ten_match;
+

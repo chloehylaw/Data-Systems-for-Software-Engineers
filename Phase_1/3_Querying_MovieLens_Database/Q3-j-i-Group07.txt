@@ -1,0 +1,24 @@
+/*
+j. Let us find the close friends of Annette Nicole. Print the names of all actors who have starred
+in (at least) all movies in which Annette Nicole has starred in. Note that it is OK if these
+actors have starred in more movies than Annette Nicole has played in. Since PostgreSQL
+does not provide a relational division operator, we will guide you through the following steps
+(you might find it useful to consult the slides or the textbook for the alternative "double
+negation" method of performing relational division).
+
+i. First, create a view called co_actors, which returns the distinct names of actors who
+played in at least one movie with Annette Nicole. Print the number of rows in this
+view.
+*/
+	
+CREATE VIEW co_actors AS
+SELECT DISTINCT a.name
+FROM movies m, actors a
+WHERE m.mid in (SELECT m.mid
+                FROM movies m , actors a
+                WHERE a.name = 'Annette Nicole'
+                and a.mid = m.mid)
+    and m.mid = a. mid;
+SELECT count(*) from co_actors
+
+

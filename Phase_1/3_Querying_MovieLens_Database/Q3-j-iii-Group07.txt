@@ -1,0 +1,24 @@
+/*
+j. Let us find the close friends of Annette Nicole. Print the names of all actors who have starred
+in (at least) all movies in which Annette Nicole has starred in. Note that it is OK if these
+actors have starred in more movies than Annette Nicole has played in. Since PostgreSQL
+does not provide a relational division operator, we will guide you through the following steps
+(you might find it useful to consult the slides or the textbook for the alternative "double
+negation" method of performing relational division).
+
+iii. Third, create a view called non_existent from the view all_combinations by removing all legitimate (co_actor,mid) 
+pairs (i.e., pairs that exist in the actors table). Print the number of rows in this view.
+*/
+
+CREATE VIEW non_existent AS
+SELECT ac.name, ac.mid
+FROM all_combinations ac
+EXCEPT(SELECT DISTINCT a.name, m.mid
+        FROM movies m, actors a
+                WHERE m.mid in (SELECT m.mid
+                                FROM movies m , actors a
+                                WHERE a.name = 'Annette Nicole'
+                                and a.mid = m.mid)
+                and m.mid = a. mid);
+SELECT count(*) FROM non_existent
+

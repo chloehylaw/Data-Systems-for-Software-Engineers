@@ -1,0 +1,52 @@
+/*
+(b) Profile the query execution time with and without the indexes.
+
+ After creating the indexes we notice an improvement in the query execution time for example:
+
+ - question 3-k-1 takes around 200ms before indexes and that improves to around 100ms after creating the indexes.
+ - question 3-k-2 takes around 30 SECONDS to query all fields on the created view. After indexes the average is around 13 SECONDS.
+ - question 3-i takes around 500ms to execute before indexes. After indexes that is reduced to around 300ms.
+ - question 3-g takes around 160ms before indexing, after it improves to around 80ms.
+ - other improvements can be seen on other queries as well with varying degrees.
+
+========================================================================================================================
+
+For questions 3-k-2 and 3-l we asked you to use views. However, we are now interested in
+exploring the performance between views and materialized views. for this reason:
+
+(a) Re-implement your answer for question 3-k-2 using materialized views.
+
+(b) Re-implement your answer for questions 3-l using materialized views.
+
+
+*/
+
+
+-- a) Re-implement your answer for question 3-k-2 using materialized views.
+/*
+we notice that querying the materialized view takes around 90ms compared to the normal view which takes
+around 13 SECONDS. This makes sense because we know that on a normal view we compute the result every time
+we query the view, but on a materialized view the data is actually stored and we do not need to compute it 
+on the fly which makes materialized view significantly faster. However, we have to rememebr that wer need
+to refresh materialized views to update the data inside it. 
+*/
+
+CREATE MATERIALIZED VIEW materialized_most_social_actor AS (SELECT a1.name as Actor, COUNT(DISTINCT a2.name)-1 as co_actors
+FROM actors a1, actors a2
+WHERE a1.mid = a2.mid
+AND a2.mid IN(SELECT a1.mid
+              FROM actors a1
+              )
+GROUP BY a1.name
+ORDER BY co_actors DESC
+);
+
+select * from materialized_most_social_actor -- this takes ~90ms
+
+
+
+
+
+
+
+

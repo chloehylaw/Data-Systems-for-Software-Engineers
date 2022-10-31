@@ -1,0 +1,15 @@
+
+CREATE VIEW most_social_actor AS (SELECT a1.name as Actor, COUNT(DISTINCT a2.name)-1 as co_actors
+FROM actors a1, actors a2
+WHERE a1.mid = a2.mid
+AND a2.mid IN(SELECT a1.mid
+              FROM actors a1
+              )
+GROUP BY a1.name
+ORDER BY co_actors DESC
+);
+
+select * from most_social_actor
+
+
+

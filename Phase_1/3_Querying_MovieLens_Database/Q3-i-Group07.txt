@@ -1,0 +1,13 @@
+/*
+i. Let us find out who is the actor with the highest ’longevity.’ Print the name of the actor/actress who has been playing in movies 
+for the longest period of time (i.e., the time interval between their first movie and their last movie is the greatest).
+*/
+	
+SELECT a.name
+    FROM movies m, actors a
+    WHERE a.mid = m.mid
+    GROUP BY a.name
+    ORDER BY max(m.year) - min(m.year) DESC
+    LIMIT 1
+
+

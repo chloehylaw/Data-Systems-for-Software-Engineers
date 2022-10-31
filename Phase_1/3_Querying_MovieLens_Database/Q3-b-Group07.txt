@@ -1,0 +1,4 @@
+SELECT A.name
+FROM actors A, movies M
+WHERE M.title = 'The Dark Knight' and M.mid = A.mid
+ORDER by A.name asc

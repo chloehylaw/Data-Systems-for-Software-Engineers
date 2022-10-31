@@ -1,0 +1,24 @@
+/*
+Creating indexes on the tables to optimize performance
+*/
+
+CREATE INDEX idx_movies ON movies (mid);
+
+
+
+CREATE INDEX idx_actors ON actors (mid, name);
+
+
+
+CREATE INDEX idx_tags ON tags (mid, tid);
+
+
+
+
+CREATE INDEX idx_genres ON genres (mid, genre);
+
+
+
+CREATE INDEX idx_tag_names ON tag_names (tid);
+
+

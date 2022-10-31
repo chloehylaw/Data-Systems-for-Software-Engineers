@@ -1,0 +1,96 @@
+--Checking if each table has duplicates:
+-- Showing that movies contains duplicates
+CREATE VIEW movies_duplicates_check AS
+SELECT year, title, COUNT(title) as count
+FROM movies
+GROUP BY year, title
+HAVING COUNT(title) > 1
+UNION
+SELECT year, title, COUNT(title)
+FROM movies
+GROUP BY year, title
+HAVING COUNT(title) = 1;
+
+
+-- Showing that actors contains duplicates
+CREATE VIEW actors_duplicates_check AS
+SELECT name, cast_position, COUNT(name) as count
+FROM actors
+GROUP BY name, cast_position
+HAVING COUNT(name) > 1
+UNION
+SELECT name, cast_position, COUNT(name) as count
+FROM actors
+GROUP BY name, cast_position
+HAVING COUNT(name) = 1;
+
+
+-- Showing that genres does not contain duplicates
+CREATE VIEW genres_duplicates_check AS
+SELECT genre, COUNT(genre) as count
+FROM genres
+GROUP BY genre
+HAVING COUNT(genre) > 1
+UNION
+SELECT genre, COUNT(genre) as count
+FROM genres
+GROUP BY genre
+HAVING COUNT(genre) = 1;
+
+
+-- Showing that tags does not contain duplicates
+CREATE VIEW tags_duplicates_check AS
+SELECT tid, COUNT(tid) as count
+FROM tags
+GROUP BY tid
+HAVING COUNT(tid) > 1
+UNION
+SELECT tid, COUNT(tid) as count
+FROM tags
+GROUP BY tid
+HAVING COUNT(tid) = 1;
+
+
+-- Showing that tag_names does not contain duplicates
+CREATE VIEW tag_names_duplicates_check AS
+SELECT tag, COUNT(tag) as count
+FROM tag_names
+GROUP BY tag
+HAVING COUNT(tag) > 1
+UNION
+SELECT tag, COUNT(tag) as count
+FROM tag_names
+GROUP BY tag
+HAVING COUNT(tag) = 1;
+
+
+
+-- Therefore, here is the list of tables that contains duplicates:
+--      movies
+--      actors
+
+--View for movies with no duplicates
+CREATE VIEW movies_no_duplicates AS
+SELECT year, title, COUNT(title)
+FROM movies
+GROUP BY year, title
+HAVING COUNT(title) = 1;
+
+--View for actors with no duplicates
+CREATE VIEW actors_no_duplicates AS
+SELECT name, cast_position, COUNT(name) as count
+FROM actors
+GROUP BY name, cast_position
+HAVING COUNT(name) = 1;
+
+
+SELECT *
+FROM movies_no_duplicates
+ORDER BY movies_no_duplicates.count DESC;
+
+SELECT *
+FROM actors_no_duplicates
+ORDER BY actors_no_duplicates.count DESC;
+
+
+
